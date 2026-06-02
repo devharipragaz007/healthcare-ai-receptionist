@@ -1,0 +1,11 @@
+# Pipecat with OpenAI Realtime and Silero VAD support
+pipecat-ai[openai,silero]>=0.0.47
+
+# HTTP client for Next.js tool API calls
+aiohttp>=3.9.0
+
+# Environment variable loading
+python-dotenv>=1.0.0
+
+# Structured logging
+loguru>=0.7.0
