@@ -1,179 +1,161 @@
 # CareAI Receptionist
 
-> AI-powered healthcare receptionist for modern clinics.
+> An AI-powered healthcare receptionist and clinic workflow platform — voice-first patient intake, real-time appointment management, and AI-generated visit summaries.
 
 ---
 
-## Project Overview
+## Overview
 
-CareAI Receptionist demonstrates a modern healthcare workflow powered by voice AI and intelligent automation. Patients interact with a conversational AI to:
+CareAI Receptionist replaces the clinic front desk with a conversational voice AI. Patients speak naturally to book, reschedule, or cancel appointments — no hold music, no forms, no friction. Behind the scenes, doctors get a clean workflow to manage their daily schedule, document clinical visits, and deliver AI-generated visit summaries back to patients.
 
-- Book appointments
-- Reschedule appointments
-- Cancel appointments
-- Access visit history
-
-Designed to reduce administrative overhead for clinic staff while giving patients instant, 24/7 access to their healthcare scheduling.
+This is a full-stack demonstration of what a modern healthcare platform looks like when voice AI, patient portals, and clinical tooling are built together from the ground up.
 
 ---
 
-## Vision
+## Problem Statement
 
-A fully voice-enabled AI receptionist that integrates with clinic scheduling systems and surfaces AI-generated visit summaries for doctors — all in a clean, accessible web interface.
+Healthcare clinics are operationally expensive at the front desk. A high percentage of inbound calls are appointment-related — scheduling, rescheduling, cancellations, and status checks. These calls:
 
----
+- Require dedicated administrative staff during business hours
+- Create hold times that erode patient satisfaction
+- Generate no structured data without manual entry
+- Leave patients with no self-service visibility into their own records
 
-## Current Progress
-
-| Phase | Status |
-|---|---|
-| Phase 0 — Project Setup | Complete |
-| Phase 1 — Data Model | Complete |
-| Phase 2 — Landing Page & AI Receptionist Experience | Complete |
-| Phase 3 — Appointment APIs & Patient Portal | Complete |
-| Phase 4 — Pipecat Voice Receptionist | Code Complete — Voice Verification Pending |
-| Phase 5 — Doctor Workflow and Visit Management | Complete |
-| Phase 6 — AI Visit Summary Generation | Complete |
-| Phase 7 — Realtime Updates + Production Readiness | Next |
-| Phase 8 — Demo Polish | Planned |
-| Phase 9 — Deployment | Planned |
-
-See [docs/roadmap.md](docs/roadmap.md) for full phase details.
+At the same time, the doctor-side of the workflow is fragmented. Clinical notes are captured in one system, appointment schedules in another, and patient-facing communication falls through the gaps entirely.
 
 ---
 
-## Tech Stack
+## Solution
 
-### Frontend
-- [Next.js 16](https://nextjs.org/) (App Router)
-- [TypeScript](https://www.typescriptlang.org/) (strict mode)
-- [Tailwind CSS v4](https://tailwindcss.com/)
-- [shadcn/ui](https://ui.shadcn.com/) (base-ui variant)
-- [Lucide React](https://lucide.dev/) (icons)
+CareAI Receptionist demonstrates three tightly integrated layers:
 
-### Backend
-- Next.js Route Handlers + Server Actions
+1. **Voice AI front desk** — a self-hosted voice agent that handles natural-language appointment management 24/7, with real-time tool calls into the clinic's scheduling system.
+2. **Patient portal** — a live view of upcoming appointments, appointment history, and AI-generated plain-language visit summaries.
+3. **Doctor workflow** — a schedule-driven dashboard where doctors open visits, enter clinical notes, complete appointments, and trigger AI summary generation automatically.
 
-### Database
-- [Prisma 7](https://www.prisma.io/) ORM
-- SQLite (via `better-sqlite3` + `@prisma/adapter-better-sqlite3`)
-
-### AI / Voice
-- [Pipecat](https://github.com/pipecat-ai/pipecat) — self-hosted Python voice server
-- [OpenAI Realtime API](https://platform.openai.com/docs/guides/realtime) — `gpt-4o-realtime-preview` (speech-to-speech)
-- [OpenAI](https://openai.com/) — `gpt-4o-mini` for AI visit summary generation (Phase 6)
+All three layers share a single data layer. A booking made through the voice AI appears immediately in both the patient portal and the doctor's dashboard.
 
 ---
 
-## Local Development
+## Core Capabilities
 
-### Prerequisites
+### Voice AI Receptionist
 
-- Node.js 20+
-- Python 3.10+
-- npm
+- **Natural language appointment booking** — patients speak in full sentences; the AI extracts intent, patient identity, doctor preference, date, and reason without a form
+- **Appointment rescheduling** — change dates and times conversationally
+- **Appointment cancellation** — cancel with a single spoken request
+- **Appointment lookup** — ask the AI to read back upcoming appointments
+- **Live tool calling** — every voice action writes to or reads from the live database in real time; no mock data
+- **Real-time transcripts** — conversation transcript displayed in the UI as the call progresses
 
-### Installation
+### Patient Experience
 
-```bash
-npm install
-```
+- View upcoming, past, and cancelled appointments in a unified portal
+- Book appointments through voice or a self-service form
+- Reschedule or cancel upcoming appointments directly from the portal
+- Read AI-generated visit summaries after each completed appointment — plain language, no clinical jargon
+- No access to raw clinical notes; patients receive only the curated summary
 
-### Environment Setup
+### Doctor Experience
 
-```bash
-cp .env.example .env
-```
+- Daily schedule dashboard showing all active appointments sorted by time
+- One-click navigation from appointment to visit page
+- Clinical notes editor with draft-save support mid-visit
+- One-click visit completion that triggers AI summary generation automatically
+- Recent visits log with note previews
+- Notes are preserved for completed visits and remain editable after completion
 
-At minimum populate:
+### AI Capabilities
 
-```env
-DATABASE_URL="file:./dev.db"
-NEXT_PUBLIC_PIPECAT_SERVER_URL="ws://localhost:8765"
-```
-
-### Database Commands
-
-```bash
-npm run db:generate   # regenerate Prisma client after schema changes
-npx prisma migrate deploy
-npm run db:seed       # 10 patients, 3 doctors, 15 appointments, 5 visits
-```
-
-### Run the Next.js Dev Server
-
-```bash
-npm run dev
-```
-
-App runs at [http://localhost:3000](http://localhost:3000).
-
-### Run the Pipecat Voice Server
-
-```bash
-cd voice-server
-python -m venv .venv
-source .venv/bin/activate    # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-cp .env.example .env         # add your OPENAI_API_KEY
-python bot.py
-```
-
-Voice server listens at `ws://localhost:8765`.
+- **Speech-to-speech voice interaction** — OpenAI Realtime API handles STT, reasoning, and TTS in a single pass with sub-second latency
+- **Structured tool calling** — the voice model calls typed API endpoints to read and write appointments in real time during a conversation
+- **Clinical note summarization** — GPT-4o-mini converts raw clinical notes into structured, patient-friendly visit summaries
+- **Non-blocking AI generation** — summary generation is fire-and-forget; visit completion never fails due to an AI error; fallback text is stored if the model is unavailable
 
 ---
 
-## Routes & API
+## End-to-End Workflow
 
-| Route / Endpoint | Type | Description |
+```
+Patient
+  └─▶  Voice AI Receptionist  (natural language → structured booking)
+         └─▶  Appointment Created  (live in database)
+                └─▶  Doctor Dashboard  (appointment visible on schedule)
+                       └─▶  Visit Page  (doctor opens, enters clinical notes)
+                              └─▶  Complete Visit  (AI summary generated)
+                                     └─▶  Patient Portal  (summary visible to patient)
+```
+
+The entire cycle — from voice booking to the patient reading their AI-generated visit summary — runs end-to-end in a single application with no external SaaS dependencies beyond the OpenAI API.
+
+---
+
+## Demo Personas
+
+The application ships with pre-seeded demo data. No sign-up or configuration is required to explore either portal.
+
+| Role | Name | Portal |
 |---|---|---|
-| `/` | Server | Landing page — Hero, Features, HowItWorks |
-| `/patient` | Server | Patient portal — upcoming/past/cancelled appointments |
-| `/doctor` | Server | Doctor dashboard — today's schedule, recent visits |
-| `/doctor/visits/[appointmentId]` | Server | Visit detail + note editor |
-| `/debug` | Server | DB entity counts |
-| `POST /api/appointments` | Route | Book appointment |
-| `PATCH /api/appointments/[id]` | Route | Reschedule appointment |
-| `DELETE /api/appointments/[id]` | Route | Cancel appointment |
-| `GET /api/patients/[id]/appointments` | Route | Get patient appointments |
-| `POST /api/tools/book` | Route | Voice tool — book appointment |
-| `POST /api/tools/reschedule` | Route | Voice tool — reschedule appointment |
-| `POST /api/tools/cancel` | Route | Voice tool — cancel appointment |
-| `POST /api/tools/get-appointments` | Route | Voice tool — list patient appointments |
+| Patient | James Harrington | `/patient` |
+| Doctor | Dr. Anika Kumar | `/doctor` |
+
+The seed dataset includes 10 patients, 3 doctors, 15 appointments across statuses, and 5 completed visits with clinical notes — enough context to demonstrate every feature without manual setup.
 
 ---
 
-## Voice Architecture
+## Example User Journey
 
-See [docs/pipecat-architecture.md](docs/pipecat-architecture.md) for the full voice architecture, audio protocol, and deployment guide.
+**Patient calls the AI receptionist:**
 
-**Quick summary:**
-- Browser opens a WebSocket to the Pipecat server
-- Microphone audio → PCM16 → WebSocket → Pipecat → OpenAI Realtime API
-- OpenAI Realtime handles STT + LLM + TTS in one speech-to-speech pass
-- Tool calls → Pipecat → HTTP POST to `/api/tools/*` → Next.js service layer → SQLite
+> "Hi, I'd like to book an appointment with Dr. Kumar. My name is James Harrington. I need to come in next Monday at 10am for a blood pressure check."
+
+The AI confirms name, email, doctor, date, and reason through natural conversation. The appointment is written to the database in real time.
+
+**Patient opens their portal (`/patient`):**
+
+The new appointment appears immediately under Upcoming Appointments, with options to reschedule or cancel.
+
+**Dr. Anika Kumar opens her dashboard (`/doctor`):**
+
+James Harrington's appointment appears on her daily schedule. She clicks through to the visit page.
+
+**Doctor documents the visit:**
+
+> "Patient presents with elevated blood pressure at 148/92 mmHg. Reports increased stress over the past two weeks. No chest pain. Advised dietary changes and follow-up in 4 weeks."
+
+She saves the notes and clicks **Complete Visit**.
+
+**AI generates the visit summary automatically:**
+
+The system calls GPT-4o-mini, which converts the clinical notes into a patient-friendly summary. The summary is stored alongside the visit record.
+
+**Patient returns to their portal:**
+
+Under Past Appointments, James sees a plain-language summary of his visit — diagnosis context, key observations, and follow-up guidance — without exposure to raw clinical terminology.
 
 ---
 
-### Lint and Build
+## Technology Stack
 
-```bash
-npm run lint
-npm run build
-```
+| Layer | Technology |
+|---|---|
+| Web framework | Next.js (App Router, Server Actions) |
+| Language | TypeScript |
+| Styling | Tailwind CSS |
+| ORM + database | Prisma + SQLite |
+| Voice server | Pipecat (self-hosted Python) |
+| Voice AI | OpenAI Realtime API (`gpt-4o-realtime-preview`) |
+| Summary AI | OpenAI (`gpt-4o-mini`) |
 
 ---
 
-## Project Phases
+## Why This Project Exists
 
-See [docs/roadmap.md](docs/roadmap.md) for a full breakdown of each phase.
+CareAI Receptionist demonstrates end-to-end fluency across the technical domains that define modern healthcare SaaS:
 
-- [Phase 0](docs/phase-0.md) — Project setup, database foundation, UI shell
-- [Phase 1](docs/phase-1.md) — Healthcare data model, repositories, validators, services
-- [Phase 2](docs/phase-2.md) — Landing page, brand, portal shells, documentation
-- [Phase 3](docs/phase-3.md) — Appointment APIs, patient portal, booking/reschedule/cancel
-- [Phase 4](docs/phase-4.md) — Pipecat voice receptionist, tool endpoints, transcript display
-- [Phase 5](docs/phase-5.md) — Doctor workflow, visit management, patient portal enhancement
-- [Phase 6](docs/phase-6.md) — AI visit summary generation, regenerate action, patient summary view
-- [Pipecat Architecture](docs/pipecat-architecture.md) — Voice stack deep-dive
-- [Demo Script](docs/demo-script.md) — founder demo walkthrough
+- **Voice AI integration** — real-time speech-to-speech with live tool calling into a production data layer, not a demo sandbox
+- **Healthcare data modeling** — appointments, visits, clinical notes, and patient records with enforced business rules (no past bookings, no double-cancels, status transitions)
+- **Patient-facing product design** — portals that surface the right information at the right level of detail; patients see summaries, not raw clinical data
+- **Doctor-facing workflow tooling** — schedule-driven UX with one-click visit management built around how clinicians actually work
+- **AI-augmented clinical workflows** — automated note-to-summary generation that is non-blocking, fault-tolerant, and regenerable on demand
+- **Full-stack ownership** — a single engineer-built system spanning a Python voice server, Next.js API layer, Prisma data model, and React portals for two distinct user roles
